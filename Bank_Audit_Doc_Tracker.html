@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bank Branch Audit – Documentation Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy-deep: #060d19;
+    --navy-primary: #0a1628;
+    --navy-surface: #112038;
+    --gold-primary: #c9a84c;
+    --gold-light: #e0c16c;
+    --gold-glow: rgba(201,168,76,0.2);
+    --bg-light: #f6f8fb;
+    --white: #ffffff;
+    --text-dark: #1e293b;
+    --text-muted: #64748b;
+    --text-light: rgba(255,255,255,0.88);
+    --border-light: #e2e8f0;
+    --green: #1e8a5e;
+    --green-bg: #e7f5ef;
+    --amber: #b8790a;
+    --amber-bg: #fdf1de;
+    --grey-bg: #eef1f6;
+    --shadow: 0 10px 34px rgba(6,13,25,0.10);
+    --shadow2: 0 2px 10px rgba(6,13,25,0.06);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top,0px); }
+  body {
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:
+      radial-gradient(1100px 480px at 100% -8%, rgba(201,168,76,0.07), transparent 60%),
+      radial-gradient(900px 420px at -6% 8%, rgba(10,22,40,0.05), transparent 55%),
+      var(--bg-light);
+    color: var(--text-dark);
+    min-height:100vh;
+    padding-top: env(safe-area-inset-top,0px);
+    padding-bottom: env(safe-area-inset-bottom,0px);
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy-primary) 55%, var(--navy-surface) 100%);
+    position:sticky; top:0; z-index:100;
+    box-shadow: 0 2px 24px rgba(6,13,25,.35);
+    padding-top: env(safe-area-inset-top,0px);
+  }
+  .header-inner {
+    max-width:1440px; margin:auto;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px; gap:16px; flex-wrap:wrap;
+  }
+  .brand { display:flex; align-items:center; gap:14px; }
+  .brand-icon {
+    width:46px; height:46px; border-radius:12px;
+    background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+    display:flex; align-items:center; justify-content:center;
+    font-size:21px; font-weight:800; color:var(--navy-deep);
+    font-family:'Playfair Display',serif; flex-shrink:0;
+    box-shadow: 0 0 0 1px var(--gold-glow), 0 4px 14px rgba(201,168,76,.3);
+  }
+  .brand-text h1 {
+    font-family:'Playfair Display',serif; font-weight:700;
+    font-size:18px; letter-spacing:.2px; line-height:1.25;
+    background: linear-gradient(135deg, #ffffff 60%, var(--gold-light) 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .brand-text p { font-size:11px; color:var(--gold-light); font-weight:500; letter-spacing:.6px; margin-top:2px; }
+  .dev-credit { font-size:11.5px; color:var(--text-light); font-weight:500; text-align:right; line-height:1.6; }
+  .dev-credit .name { display:block; font-size:14px; color:var(--gold-light); font-weight:700; font-family:'Playfair Display',serif; }
+  .dev-credit a { color:var(--text-light); text-decoration:none; border-bottom:1px solid rgba(224,193,108,.35); }
+  .dev-credit a:hover { border-color: var(--gold-light); color:var(--gold-light); }
+
+  /* ── APP LAYOUT ── */
+  .app-shell { max-width:1440px; margin:auto; padding:22px 20px 40px; }
+
+  .stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+  .stat-card {
+    background:var(--white); border-radius:16px; padding:18px 20px;
+    box-shadow:var(--shadow2); border:1px solid var(--border-light); position:relative; overflow:hidden;
+    display:flex; align-items:center; gap:16px; transition:transform .2s, box-shadow .2s;
+  }
+  .stat-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  }
+  .stat-card:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
+  .stat-card.total::before   { background: linear-gradient(90deg, var(--navy-surface), var(--navy-primary)); }
+  .stat-card.ok::before      { background: linear-gradient(90deg, var(--green), #27ae60); }
+  .stat-card.pending::before { background: linear-gradient(90deg, var(--amber), #d99a2e); }
+  .stat-card.na::before      { background: linear-gradient(90deg, var(--text-muted), #94a3b8); }
+  .stat-icon {
+    width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:20px; flex-shrink:0; border:1.5px solid transparent;
+  }
+  .stat-card.total .stat-icon   { background:var(--grey-bg); border-color:#dbe2ee; }
+  .stat-card.ok .stat-icon      { background:var(--green-bg); border-color:#bfe6d5; }
+  .stat-card.pending .stat-icon { background:var(--amber-bg); border-color:#f2dcae; }
+  .stat-card.na .stat-icon      { background:var(--grey-bg); border-color:#dbe2ee; }
+  .stat-val { font-size:27px; font-weight:800; line-height:1; font-family:'Playfair Display',serif; }
+  .stat-lbl { font-size:11px; color:var(--text-muted); font-weight:600; letter-spacing:.4px; margin-top:4px; text-transform:uppercase; }
+  .stat-card.total .stat-val   { color:var(--navy-surface); }
+  .stat-card.ok .stat-val      { color:var(--green); }
+  .stat-card.pending .stat-val { color:var(--amber); }
+  .stat-card.na .stat-val      { color:var(--text-muted); }
+
+  .layout { display:grid; grid-template-columns:300px 1fr; gap:22px; align-items:start; }
+
+  /* ── SIDEBAR (LOAN TYPE NAV) ── */
+  .sidebar {
+    background: linear-gradient(180deg, var(--navy-primary), var(--navy-deep));
+    border-radius:18px; padding:20px 14px 18px;
+    box-shadow:var(--shadow); position:sticky; top:86px;
+    border:1px solid rgba(201,168,76,.18);
+  }
+  .sidebar-title {
+    font-family:'Playfair Display',serif; font-size:12.5px; font-weight:700;
+    color:var(--gold-light); letter-spacing:1.2px; text-transform:uppercase;
+    padding:2px 10px 14px; display:flex; align-items:center; gap:8px;
+  }
+  .sidebar-title::before {
+    content:''; width:5px; height:5px; border-radius:50%; background:var(--gold-primary);
+    box-shadow:0 0 0 3px rgba(201,168,76,.25);
+  }
+  .loan-tabs { display:flex; flex-direction:column; gap:3px; max-height:calc(100vh - 190px); overflow-y:auto; }
+  .loan-tab {
+    display:flex; align-items:center; gap:11px; width:100%;
+    padding:9px 11px; border-radius:10px; border:1px solid transparent;
+    background:transparent; color:var(--text-light); cursor:pointer;
+    font-family:'Inter',sans-serif; font-size:12.6px; font-weight:500; text-align:left;
+    transition:all .15s;
+  }
+  .loan-tab .lt-icon {
+    font-size:14px; flex-shrink:0; width:28px; height:28px; border-radius:8px;
+    background:rgba(255,255,255,.06); display:flex; align-items:center; justify-content:center;
+  }
+  .loan-tab .lt-name { flex:1; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .loan-tab .badge {
+    font-size:10px; padding:2px 7px; border-radius:20px;
+    background:rgba(255,255,255,.08); color:var(--text-muted); font-weight:700; flex-shrink:0;
+  }
+  .loan-tab:hover { background:rgba(201,168,76,.10); }
+  .loan-tab.active {
+    background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+    color: var(--navy-deep); box-shadow:0 4px 14px rgba(201,168,76,.28);
+  }
+  .loan-tab.active .lt-icon { background:rgba(6,13,25,.12); }
+  .loan-tab.active .badge { background:rgba(6,13,25,.15); color:var(--navy-deep); }
+
+  /* ── CONTENT ── */
+  .content { min-width:0; }
+  .section-title {
+    font-family:'Playfair Display',serif; font-size:15px; color:var(--text-dark);
+    font-weight:700; display:flex; align-items:center; gap:9px;
+  }
+  .section-title::before {
+    content:''; display:inline-block; width:4px; height:15px;
+    background: linear-gradient(to bottom, var(--gold-primary), var(--gold-light)); border-radius:2px;
+  }
+
+  .progress-wrap {
+    background:var(--white); border:1px solid var(--border-light); border-radius:14px;
+    padding:14px 18px; margin-bottom:16px; box-shadow:var(--shadow2); display:none;
+  }
+  .progress-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .progress-label { font-size:12px; font-weight:600; color:var(--text-dark); }
+  .progress-pct { font-size:14px; font-weight:800; color:var(--navy-surface); font-family:'Playfair Display',serif; }
+  .progress-bar-bg { height:8px; background:var(--border-light); border-radius:8px; overflow:hidden; }
+  .progress-bar-fill { height:100%; border-radius:8px; transition:width .4s ease; background:linear-gradient(90deg, var(--gold-primary), var(--green)); }
+
+  .toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+  .btn {
+    padding:9px 18px; border-radius:24px; font-size:12px; font-weight:600; letter-spacing:.2px;
+    cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:7px; border:none; font-family:'Inter',sans-serif;
+  }
+  .btn-primary { background:linear-gradient(135deg, var(--navy-primary), var(--navy-surface)); color:var(--white); box-shadow:0 2px 10px rgba(6,13,25,.25); }
+  .btn-gold { background:linear-gradient(135deg, var(--gold-primary), var(--gold-light)); color:var(--navy-deep); box-shadow:0 2px 10px rgba(201,168,76,.3); }
+  .btn-gold:hover { box-shadow:0 4px 16px rgba(201,168,76,.45); transform:translateY(-1px); }
+  .btn-outline { background:var(--white); color:var(--text-dark); border:1.5px solid var(--border-light); }
+  .btn-outline:hover { border-color:var(--gold-primary); background:#fffdf7; }
+  .btn-primary:hover { box-shadow:0 4px 16px rgba(6,13,25,.35); transform:translateY(-1px); }
+
+  .checklist-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:12px; }
+  .doc-card {
+    background:var(--white); border-radius:14px; box-shadow:var(--shadow2);
+    border:1px solid var(--border-light); overflow:hidden; transition:all .2s; animation:cardIn .3s ease both;
+  }
+  .doc-card:hover { box-shadow:var(--shadow); border-color:var(--gold-glow); transform:translateY(-1px); }
+  .doc-card-header {
+    padding:13px 16px; display:flex; align-items:center; gap:10px;
+    border-bottom:1px solid var(--border-light); background:linear-gradient(to right, #fbfaf5, var(--white));
+  }
+  .doc-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+  .doc-name { font-size:13px; font-weight:600; color:var(--text-dark); line-height:1.3; flex:1; }
+  .doc-tag { font-size:10px; padding:2px 8px; border-radius:20px; font-weight:700; letter-spacing:.2px; flex-shrink:0; }
+  .doc-tag.mandatory { background:#fdecea; color:#c0392b; }
+  .doc-tag.conditional { background:var(--amber-bg); color:var(--amber); }
+  .doc-tag.optional { background:var(--grey-bg); color:var(--text-muted); }
+
+  .doc-card-body { padding:14px 16px; }
+  .doc-desc { font-size:11.5px; color:var(--text-muted); margin-bottom:12px; line-height:1.55; }
+
+  .status-btns { display:flex; gap:8px; }
+  .status-btn {
+    flex:1; padding:7px 4px; border-radius:8px; border:1.5px solid var(--border-light);
+    font-size:11px; font-weight:600; cursor:pointer; transition:all .15s;
+    background:var(--white); color:var(--text-muted); display:flex; align-items:center; justify-content:center; gap:4px;
+    font-family:'Inter',sans-serif;
+  }
+  .status-btn:hover { transform:scale(1.04); }
+  .status-btn.active-ok { background:var(--green-bg); border-color:var(--green); color:var(--green); box-shadow:0 0 0 2px rgba(30,138,94,.1); }
+  .status-btn.active-pending { background:var(--amber-bg); border-color:var(--amber); color:var(--amber); box-shadow:0 0 0 2px rgba(184,121,10,.1); }
+  .status-btn.active-na { background:var(--grey-bg); border-color:#b7c0cf; color:#586576; box-shadow:0 0 0 2px rgba(100,116,139,.1); }
+
+  .doc-card-footer { padding:8px 16px 12px; display:flex; align-items:center; gap:8px; }
+  .remarks-input {
+    flex:1; border:1.5px solid var(--border-light); border-radius:8px; padding:6px 10px;
+    font-size:11.5px; color:var(--text-dark); font-family:'Inter',sans-serif; background:var(--grey-bg); outline:none; transition:border-color .15s;
+  }
+  .remarks-input:focus { border-color:var(--gold-primary); background:var(--white); }
+  .remarks-input::placeholder { color:#a7b1c2; }
+
+  .empty-state {
+    display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    padding:64px 32px; min-height:420px; color:var(--text-muted);
+    background:var(--white); border:1px solid var(--border-light); border-radius:18px; box-shadow:var(--shadow2);
+  }
+  .empty-state .ring {
+    width:86px; height:86px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:34px; margin-bottom:20px;
+    background: linear-gradient(135deg, var(--grey-bg), var(--white));
+    border:2px solid var(--gold-glow); box-shadow:0 0 0 8px rgba(201,168,76,.06);
+  }
+  .empty-state h3 {
+    font-family:'Playfair Display',serif; font-size:19px; font-weight:700; color:var(--text-dark); margin-bottom:8px;
+  }
+  .empty-state p { font-size:13.5px; max-width:360px; line-height:1.6; margin-bottom:26px; }
+  .empty-features { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .empty-features span {
+    font-size:11.5px; font-weight:600; color:var(--navy-surface); background:var(--grey-bg);
+    border:1px solid var(--border-light); padding:7px 14px; border-radius:20px;
+  }
+
+  footer { text-align:center; padding:22px 20px 26px; font-size:11px; color:var(--text-muted); border-top:1px solid var(--border-light); background:var(--white); margin-top:10px; }
+  footer strong { color:var(--text-dark); font-weight:700; }
+  footer a { color:var(--gold-primary); text-decoration:none; font-weight:600; }
+  footer a:hover { text-decoration:underline; }
+
+  @keyframes cardIn { from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:translateY(0);} }
+
+  @media(max-width:900px) {
+    .layout { grid-template-columns:1fr; }
+    .sidebar { position:static; }
+    .loan-tabs { max-height:none; flex-direction:row; flex-wrap:wrap; }
+    .loan-tab { width:auto; flex:1 1 45%; }
+  }
+  @media(max-width:640px) {
+    .stats-bar { grid-template-columns:repeat(2,1fr); }
+    .checklist-grid { grid-template-columns:1fr; }
+    .header-inner { flex-direction:column; text-align:center; }
+    .dev-credit { text-align:center; }
+    .loan-tab { flex:1 1 100%; }
+  }
+
+  @media print {
+    header { position:relative; }
+    .toolbar, .sidebar, .status-btns { display:none !important; }
+    .layout { grid-template-columns:1fr; }
+    .doc-card { break-inside:avoid; }
+    body { background:white; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-icon">⚖</div>
+      <div class="brand-text">
+        <h1>Bank Branch Audit – Documentation Tracker</h1>
+        <p>STATUTORY AUDIT &nbsp;|&nbsp; LOAN-WISE CHECKLIST TOOL</p>
+      </div>
+    </div>
+    <div class="dev-credit">
+      Developed by <span class="name">Haresh Kumar Hemani</span>
+      <a href="https://www.taxonline24.in" target="_blank" rel="noopener">www.taxonline24.in</a> &nbsp;|&nbsp;
+      <a href="mailto:contact@taxonline24.in">contact@taxonline24.in</a>
+    </div>
+  </div>
+</header>
+
+<div class="app-shell">
+
+  <div class="stats-bar">
+    <div class="stat-card total">
+      <div class="stat-icon">📋</div>
+      <div><div class="stat-val" id="s-total">0</div><div class="stat-lbl">Total Documents</div></div>
+    </div>
+    <div class="stat-card ok">
+      <div class="stat-icon">✅</div>
+      <div><div class="stat-val" id="s-ok">0</div><div class="stat-lbl">Verified</div></div>
+    </div>
+    <div class="stat-card pending">
+      <div class="stat-icon">⏳</div>
+      <div><div class="stat-val" id="s-pending">0</div><div class="stat-lbl">Pending</div></div>
+    </div>
+    <div class="stat-card na">
+      <div class="stat-icon">—</div>
+      <div><div class="stat-val" id="s-na">0</div><div class="stat-lbl">Not Applicable</div></div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-title">Select Loan Type</div>
+      <div class="loan-tabs" id="loanTabs"></div>
+    </aside>
+
+    <div class="content">
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-header">
+          <div class="progress-label" id="progressLabel">Verification Progress</div>
+          <div class="progress-pct" id="progressPct">0%</div>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      </div>
+
+      <div class="toolbar" id="toolbar" style="display:none;">
+        <div class="section-title" id="checklistTitle"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-outline" onclick="markAll('ok')">✅ Mark All Verified</button>
+          <button class="btn btn-outline" onclick="markAll('pending')">⏳ Mark All Pending</button>
+          <button class="btn btn-outline" onclick="markAll('na')">— Mark All N/A</button>
+          <button class="btn btn-outline" onclick="resetLoan()">🔄 Reset</button>
+          <button class="btn btn-gold" onclick="window.print()">🖨 Print / Export</button>
+        </div>
+      </div>
+
+      <div class="checklist-grid" id="checklistGrid"></div>
+      <div class="empty-state" id="emptyState">
+        <div class="ring">📂</div>
+        <h3>Select a Loan Type to Begin</h3>
+        <p>Choose a loan category from the left-hand navigation to load its documentation checklist and start verification.</p>
+        <div class="empty-features">
+          <span>✅ Mandatory &amp; Conditional Tracking</span>
+          <span>📊 Live Progress</span>
+          <span>🖨 Print-Ready Export</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div style="max-width:1440px;margin:auto;">
+    <div style="background:#fdf8ec;border:1px solid var(--gold-light);border-radius:10px;padding:12px 18px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;text-align:left;">
+      <span style="font-size:16px;flex-shrink:0;">⚠️</span>
+      <div>
+        <div style="font-size:11.5px;font-weight:700;color:#7a5700;letter-spacing:.3px;text-transform:uppercase;margin-bottom:4px;">Disclaimer</div>
+        <div style="font-size:11.5px;color:#5a4000;line-height:1.7;">
+          This checklist is <strong>illustrative and not exhaustive</strong>. Documentation requirements may vary depending on the nature of credit facility, bank-specific policies, RBI Master Directions, and branch-level instructions. The auditor is advised to refer to the bank's <strong>Delegation of Power (DOP)</strong> and <strong>closing circular</strong> before finalising the checklist. For <strong>internal use only</strong> — this tool does not constitute an audit opinion, certificate, or legal document. All conclusions are subject to the auditor's <strong>independent professional judgment</strong>.
+        </div>
+      </div>
+    </div>
+    <div>
+      <strong>Bank Branch Statutory Audit </strong> &nbsp;|&nbsp; Documentation Tracker &nbsp;|&nbsp;
+      Developed by <strong>Haresh Kumar Hemani</strong> &nbsp;|&nbsp;
+      <a href="https://www.taxonline24.in" target="_blank" rel="noopener">www.taxonline24.in</a> &nbsp;|&nbsp;
+      <a href="mailto:contact@taxonline24.in">contact@taxonline24.in</a> &nbsp;|&nbsp;
+      Powered by ICAI Guidance Note on Audit of Banks (2026 Edition)
+    </div>
+  </div>
+</footer>
+
+<script>
+const LOAN_TYPES = [
+  { id:'CC',   name:'Cash Credit (CC)',        icon:'💳' },
+  { id:'OD',   name:'Overdraft (OD)',          icon:'🔄' },
+  { id:'TL',   name:'Term Loan',               icon:'📅' },
+  { id:'HL',   name:'Housing Loan',            icon:'🏠' },
+  { id:'VL',   name:'Vehicle Loan',            icon:'🚗' },
+  { id:'PL',   name:'Personal Loan',           icon:'👤' },
+  { id:'JL',   name:'Jewel Loan',              icon:'💎' },
+  { id:'SHG',  name:'SHG Loan',                icon:'👥' },
+  { id:'KCC',  name:'Kisan Credit Card (KCC)', icon:'🌾' },
+  { id:'EL',   name:'Education Loan',          icon:'🎓' },
+  { id:'MSME', name:'MSME / SME Loan',         icon:'🏭' },
+  { id:'LAP',  name:'Loan Against Property',   icon:'🏢' },
+  { id:'BD',   name:'Bills Discounting',       icon:'🧾' },
+  { id:'GL',   name:'Gold Loan',               icon:'🥇' },
+  { id:'LGFD', name:'Loan Against FD',         icon:'🏦' },
+];
+
+const ALL_DOCS = [
+  { id:'SL',   name:'Sanction Letter',              icon:'📄', tag:'mandatory',   desc:'Original sanction letter with terms, limit, ROI, and repayment schedule.' },
+  { id:'LA',   name:'Loan Agreement / DPN',         icon:'🤝', tag:'mandatory',   desc:'Demand Promissory Note and loan agreement duly stamped and signed.' },
+  { id:'KYC',  name:'KYC Documents',               icon:'🪪', tag:'mandatory',   desc:'PAN, Aadhaar, photograph, address proof of all borrowers/guarantors.' },
+  { id:'CIBIL',name:'CIBIL / Credit Report',        icon:'📊', tag:'mandatory',   desc:'CIBIL or Equifax score obtained at sanction/renewal. Check for negative flags.' },
+  { id:'CERSAI',name:'CERSAI Registration',         icon:'🔐', tag:'mandatory',   desc:'CERSAI charge creation within 30 days of mortgage / hypothecation.' },
+  { id:'MOD',  name:'MOD (Title Deed Deposit)',     icon:'🏛', tag:'conditional', desc:'Memorandum of Deposit of Title Deeds for equitable mortgage. Duly stamped.' },
+  { id:'HYP',  name:'Hypothecation Agreement',     icon:'📦', tag:'mandatory',   desc:'Hypothecation of stock / machinery / book debts / vehicles duly executed.' },
+  { id:'SS',   name:'Stock Statement',              icon:'📦', tag:'conditional', desc:'Monthly stock statements obtained and drawing power computed correctly.' },
+  { id:'BDS',  name:'Book Debt Statement',         icon:'📒', tag:'conditional', desc:'Monthly debtors/creditors statement. Debtors >90 days to be excluded from DP.' },
+  { id:'INS',  name:'Insurance',                   icon:'🛡', tag:'mandatory',   desc:'Insurance of assets (stock, machinery, property) with bank as assignee/beneficiary.' },
+  { id:'RL',   name:'Renewal Letter',              icon:'✉', tag:'mandatory',   desc:'Renewal letter / review memorandum with updated financials and credit assessment.' },
+  { id:'FS',   name:'Financial Statements',        icon:'📈', tag:'conditional', desc:'Audited P&L, Balance Sheet. ITR and GST returns for recent 2-3 years.' },
+  { id:'VR',   name:'Valuation Report',            icon:'🏷', tag:'conditional', desc:'Primary & collateral valuation by approved valuer. Not older than 3 years.' },
+  { id:'LSR',  name:'Legal Search Report',         icon:'⚖',  tag:'conditional', desc:'Title verification, encumbrance search, ROC search (for companies).' },
+  { id:'PG',   name:'Personal Guarantee',          icon:'✍', tag:'conditional', desc:'Personal guarantee of promoters / directors / third party as per sanction terms.' },
+  { id:'BC',   name:'Balance Confirmation',        icon:'✔', tag:'mandatory',   desc:'Borrower confirmation of outstanding balance. Obtained annually.' },
+  { id:'SA',   name:'Stock Audit Report',          icon:'🔍', tag:'conditional', desc:'Stock audit by bank empanelled auditor. Applicable where limit > ₹5 Cr.' },
+  { id:'ROC',  name:'ROC Search / Charge',        icon:'🏢', tag:'conditional', desc:'ROC search and charge registration for company borrowers (Form CHG-1/9).' },
+  { id:'DR',   name:'Diligence Report',            icon:'📑', tag:'conditional', desc:'CA Diligence Report for consortium / MBA accounts with exposure > ₹5 Cr.' },
+  { id:'SARFAESI',name:'SARFAESI Notice / Action', icon:'⚠', tag:'conditional', desc:'NPA accounts — check SARFAESI 13(2) notice, possession, DRT proceedings status.' },
+  { id:'REG',  name:'Registration / GST / ITR',   icon:'🗂', tag:'conditional', desc:'GST registration, GST returns, Income Tax Returns filed by borrower.' },
+  { id:'NEFT', name:'Disbursement Record',         icon:'💸', tag:'mandatory',   desc:'Mode of disbursement directly to vendor / account. No cash disbursement above limits.' },
+  { id:'NOC',  name:'No Dues Certificate',        icon:'📋', tag:'conditional', desc:'NOC from existing lenders (applicable for takeover / new borrowers).' },
+  { id:'PA',   name:'Partnership Deed / MOA',     icon:'📜', tag:'conditional', desc:'Partnership deed / MOA / AOA / Board resolution as applicable to entity type.' },
+  { id:'EM',   name:'End-Use Monitoring',         icon:'🎯', tag:'conditional', desc:'Evidence of end use verification — post-disbursement inspection report.' },
+  { id:'CC_RENEW', name:'CC / OD Renewal Due Date', icon:'📅', tag:'conditional', desc:'Check whether CC/OD limit has been renewed within due date. Overdue > 180 days = NPA.' },
+  { id:'SOLVENCY', name:'Solvency Certificate',   icon:'📊', tag:'conditional', desc:'Solvency certificate of guarantors / third parties if required as per sanction.' },
+  { id:'SHG_REG', name:'SHG Registration & Minutes', icon:'👥', tag:'conditional', desc:'SHG group registration, meeting minutes, savings account statement of group.' },
+  { id:'CROP', name:'Crop / Land Records',        icon:'🌿', tag:'conditional', desc:'Land records (7/12), crop details, SLBC scale of finance compliance.' },
+  { id:'GOLD_VAL', name:'Gold Valuation Certificate', icon:'💎', tag:'conditional', desc:'Gold purity test report by approved assayer / in-house. LTV ≤ 75%.' },
+];
+
+const LOAN_DOCS = {
+  CC:   ['SL','LA','KYC','CIBIL','CERSAI','HYP','SS','BDS','INS','RL','FS','BC','SA','ROC','DR','REG','NEFT','NOC','PA','CC_RENEW','SOLVENCY','PG'],
+  OD:   ['SL','LA','KYC','CIBIL','CERSAI','MOD','HYP','INS','RL','FS','BC','VR','LSR','ROC','PA','NEFT','PG','CC_RENEW','SOLVENCY'],
+  TL:   ['SL','LA','KYC','CIBIL','CERSAI','MOD','HYP','INS','RL','FS','VR','BC','PG','LSR','ROC','NEFT','PA','EM','SOLVENCY','SARFAESI'],
+  HL:   ['SL','LA','KYC','CIBIL','CERSAI','MOD','INS','RL','VR','LSR','BC','NEFT','EM'],
+  VL:   ['SL','LA','KYC','CIBIL','HYP','INS','RL','BC','NEFT','EM'],
+  PL:   ['SL','LA','KYC','CIBIL','INS','RL','BC','NEFT','SOLVENCY'],
+  JL:   ['SL','LA','KYC','CIBIL','INS','BC','GOLD_VAL','NEFT'],
+  SHG:  ['SL','LA','KYC','INS','BC','SHG_REG','NEFT','NOC'],
+  KCC:  ['SL','LA','KYC','CIBIL','INS','BC','NEFT','CROP','NOC','REG'],
+  EL:   ['SL','LA','KYC','CIBIL','INS','RL','BC','NEFT','EM'],
+  MSME: ['SL','LA','KYC','CIBIL','CERSAI','HYP','SS','BDS','INS','RL','FS','BC','SA','ROC','DR','REG','NEFT','NOC','PA','CC_RENEW','SOLVENCY','PG','EM'],
+  LAP:  ['SL','LA','KYC','CIBIL','CERSAI','MOD','INS','RL','VR','LSR','BC','ROC','PA','NEFT','PG','SOLVENCY'],
+  BD:   ['SL','LA','KYC','CIBIL','HYP','INS','BC','FS','REG','NEFT','ROC'],
+  GL:   ['SL','LA','KYC','GOLD_VAL','INS','BC','NEFT'],
+  LGFD: ['SL','LA','KYC','INS','BC','NEFT'],
+};
+
+let activeLoans = {};
+let currentLoan = null;
+
+function init() {
+  LOAN_TYPES.forEach(lt => { activeLoans[lt.id] = {}; });
+  const tabsEl = document.getElementById('loanTabs');
+  LOAN_TYPES.forEach(lt => {
+    const t = document.createElement('button');
+    t.className = 'loan-tab';
+    t.id = `tab-${lt.id}`;
+    t.innerHTML = `<span class="lt-icon">${lt.icon}</span><span class="lt-name">${lt.name}</span><span class="badge" id="badge-${lt.id}">0/${(LOAN_DOCS[lt.id]||[]).length}</span>`;
+    t.onclick = () => loadLoan(lt.id);
+    tabsEl.appendChild(t);
+  });
+  document.getElementById('emptyState').style.display = 'flex';
+  updateGlobalStats();
+}
+
+function loadLoan(loanId) {
+  currentLoan = loanId;
+  const lt = LOAN_TYPES.find(l => l.id === loanId);
+  const docIds = LOAN_DOCS[loanId] || [];
+  const state = activeLoans[loanId];
+
+  document.querySelectorAll('.loan-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${loanId}`).classList.add('active');
+
+  document.getElementById('checklistTitle').textContent = `${lt.icon} ${lt.name} — Documentation Checklist`;
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('toolbar').style.display = 'flex';
+
+  const grid = document.getElementById('checklistGrid');
+  grid.innerHTML = '';
+  docIds.forEach((dId,i) => {
+    const doc = ALL_DOCS.find(d => d.id === dId);
+    if (!doc) return;
+    if (!state[dId]) state[dId] = { status: null, remark: '' };
+    const s = state[dId];
+    const card = document.createElement('div');
+    card.className = 'doc-card';
+    card.style.animationDelay = `${Math.min(i*0.03,0.4)}s`;
+
+    const tagMap = { mandatory:'🔴 Mandatory', conditional:'🟡 Conditional', optional:'🔵 Optional' };
+    const btnStates = ['ok','pending','na'];
+    const btnLabels = { ok:'✅ Verified', pending:'⏳ Pending', na:'— N/A' };
+
+    card.innerHTML = `
+      <div class="doc-card-header">
+        <div class="doc-icon" style="background:${iconBg(doc.tag)}">${doc.icon}</div>
+        <div class="doc-name">${doc.name}</div>
+        <div class="doc-tag ${doc.tag}">${tagMap[doc.tag]}</div>
+      </div>
+      <div class="doc-card-body">
+        <div class="doc-desc">${doc.desc}</div>
+        <div class="status-btns">
+          ${btnStates.map(st => `
+            <button class="status-btn ${s.status === st ? 'active-'+st : ''}"
+              id="btn-${loanId}-${dId}-${st}"
+              onclick="setStatus('${loanId}','${dId}','${st}')">
+              ${btnLabels[st]}
+            </button>`).join('')}
+        </div>
+      </div>
+      <div class="doc-card-footer">
+        <input class="remarks-input" type="text" placeholder="Add remarks / reference..."
+          value="${s.remark}"
+          oninput="setRemark('${loanId}','${dId}',this.value)">
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  updateProgress(loanId);
+  updateGlobalStats();
+}
+
+function iconBg(tag) {
+  return tag === 'mandatory' ? '#fdecea' : tag === 'conditional' ? '#fdf1de' : '#eef1f6';
+}
+
+function setStatus(loanId, docId, status) {
+  const state = activeLoans[loanId][docId];
+  if (state.status === status) { state.status = null; }
+  else { state.status = status; }
+
+  ['ok','pending','na'].forEach(st => {
+    const btn = document.getElementById(`btn-${loanId}-${docId}-${st}`);
+    if (btn) { btn.className = 'status-btn' + (state.status === st ? ` active-${st}` : ''); }
+  });
+
+  updateProgress(loanId);
+  updateBadge(loanId);
+  updateGlobalStats();
+}
+
+function setRemark(loanId, docId, val) { activeLoans[loanId][docId].remark = val; }
+
+function markAll(status) {
+  if (!currentLoan) return;
+  const docIds = LOAN_DOCS[currentLoan] || [];
+  docIds.forEach(dId => {
+    if (!activeLoans[currentLoan][dId]) activeLoans[currentLoan][dId] = {status:null,remark:''};
+    activeLoans[currentLoan][dId].status = status;
+  });
+  loadLoan(currentLoan);
+}
+
+function resetLoan() {
+  if (!currentLoan) return;
+  const docIds = LOAN_DOCS[currentLoan] || [];
+  docIds.forEach(dId => { activeLoans[currentLoan][dId] = {status:null,remark:''}; });
+  loadLoan(currentLoan);
+}
+
+function updateProgress(loanId) {
+  const docIds = LOAN_DOCS[loanId] || [];
+  const state = activeLoans[loanId];
+  const mandatoryDocs = docIds.filter(d => {
+    const doc = ALL_DOCS.find(x => x.id === d);
+    return doc && doc.tag === 'mandatory';
+  });
+  const verified = mandatoryDocs.filter(d => state[d] && state[d].status === 'ok').length;
+  const total = mandatoryDocs.length || 1;
+  const pct = Math.round((verified/total)*100);
+
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `Mandatory Documents Verified: ${verified} / ${total}`;
+}
+
+function updateBadge(loanId) {
+  const docIds = LOAN_DOCS[loanId] || [];
+  const state = activeLoans[loanId];
+  const ok = docIds.filter(d => state[d] && state[d].status === 'ok').length;
+  const badge = document.getElementById(`badge-${loanId}`);
+  if (badge) badge.textContent = `${ok}/${docIds.length}`;
+}
+
+function updateGlobalStats() {
+  let total=0, ok=0, pending=0, na=0;
+  LOAN_TYPES.forEach(lt => {
+    const docIds = LOAN_DOCS[lt.id] || [];
+    const state = activeLoans[lt.id] || {};
+    docIds.forEach(dId => {
+      total++;
+      const s = (state[dId] || {}).status;
+      if (s === 'ok') ok++;
+      else if (s === 'pending') pending++;
+      else if (s === 'na') na++;
+    });
+    const bk = docIds.filter(d => state[d] && state[d].status === 'ok').length;
+    const badge = document.getElementById(`badge-${lt.id}`);
+    if (badge) badge.textContent = `${bk}/${docIds.length}`;
+  });
+  document.getElementById('s-total').textContent   = total;
+  document.getElementById('s-ok').textContent      = ok;
+  document.getElementById('s-pending').textContent = pending;
+  document.getElementById('s-na').textContent      = na;
+}
+
+init();
+</script>
+</body>
+</html>
