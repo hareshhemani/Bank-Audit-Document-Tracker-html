@@ -4,7 +4,6 @@ A single-file, browser-based checklist tool for statutory bank branch auditors t
 
 ![App Screenshot](./image.PNG)
 
-> Upload your screenshot to the repository root with the exact filename **`image.png`** (same folder as this README) — GitHub will render it above automatically once pushed.
 
 ---
 
