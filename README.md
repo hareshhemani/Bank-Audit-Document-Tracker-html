@@ -2,7 +2,7 @@
 
 A single-file, browser-based checklist tool for statutory bank branch auditors to track loan-wise documentation compliance (Statutory Audit).
 
-![App Screenshot](./image.png)
+![App Screenshot](./image.PNG)
 
 > Upload your screenshot to the repository root with the exact filename **`image.png`** (same folder as this README) — GitHub will render it above automatically once pushed.
 
